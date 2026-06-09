@@ -36,3 +36,15 @@ def build_sinusoidal_positional_encoding(max_len, d_model):
     pe = fill_odd_indices_with_cos(pe, div, pos)
 
     return pe
+
+def add_positional_encoding_to_embeddings(embedded_batch, positional_encoding):
+    """
+    add the first L rows of positional_encoding to embedded_batch and return the sum.
+    """
+    batch_size = embedded_batch.shape[0]
+    L = embedded_batch.shape[1]
+    added = torch.clone(embedded_batch)
+
+    for b in range(batch_size):
+        added[b] = embedded_batch[b] + positional_encoding[:L]
+    return added
