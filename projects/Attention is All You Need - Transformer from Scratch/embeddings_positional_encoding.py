@@ -24,3 +24,15 @@ def fill_odd_indices_with_cos(pe, position, div_term):
     """Fill odd feature indices of pe with cos(position * div_term)."""
     pe[:, 1::2] = torch.cos(position * div_term)
     return pe
+
+def build_sinusoidal_positional_encoding(max_len, d_model):
+    """Assemble the (max_len, d_model) sinusoidal positional encoding matrix."""
+    pe = torch.zeros(max_len, d_model)
+
+    div = compute_positional_div_term(d_model)
+    pos = build_position_index_column(max_len)
+    
+    pe = fill_even_indices_with_sin(pe, div, pos)
+    pe = fill_odd_indices_with_cos(pe, div, pos)
+
+    return pe
