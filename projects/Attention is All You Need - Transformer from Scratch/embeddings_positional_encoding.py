@@ -19,3 +19,8 @@ def fill_even_indices_with_sin(pe, position, div_term):
     """Fill even feature indices of pe with sin(position * div_term)."""
     pe[:,::2] = torch.sin(position * div_term)
     return pe
+
+def fill_odd_indices_with_cos(pe, position, div_term):
+    """Fill odd feature indices of pe with cos(position * div_term)."""
+    pe[:, 1::2] = torch.cos(position * div_term)
+    return pe
