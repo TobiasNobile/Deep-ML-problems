@@ -7,3 +7,13 @@ def build_padding_mask(token_ids, pad_id):
     mask = token_ids != pad_id 
 
     return torch.reshape(mask, (B, 1, 1, L))
+
+def build_causal_mask(seq_len):
+    """Return a (1, 1, seq_len, seq_len) bool mask, True on and below diagonal."""
+    mask = torch.zeros((seq_len, seq_len), dtype = torch.bool)
+    for i in range(seq_len):
+        for j in range(seq_len):
+            if j <= i:
+                mask[i, j] = True
+
+    return torch.reshape(torch.tril(mask), (1, 1, seq_len, seq_len))
