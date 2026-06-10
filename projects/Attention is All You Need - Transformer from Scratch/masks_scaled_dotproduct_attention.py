@@ -23,3 +23,8 @@ def combine_padding_and_causal_masks(padding_mask, causal_mask):
     Combine a (B,1,1,L) padding mask with a (1,1,L,L) causal mask into (B,1,L,L).
     """
     return padding_mask & causal_mask
+
+def compute_raw_attention_scores(query, key):
+    """Compute raw attention scores Q @ K^T over the last two dimensions."""
+    Kt = torch.transpose(key, -1, -2)
+    return torch.matmul(query, Kt)
