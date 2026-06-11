@@ -52,3 +52,16 @@ def softmax_attention_weights(masked_scores):
 def apply_attention_weights_to_values(attention_weights, value):
     """Multiply attention weights by the value matrix to produce context vectors."""
     return attention_weights @ value
+
+def scaled_dot_product_attention(query, key, value, mask=None):
+    """Run scaled dot-product attention; return (context, attention_weights)."""
+    Kt = torch.transpose(key, -1, -2)
+
+    scores = torch.matmul(query, Kt) / math.sqrt(key.shape[-1])
+    masked_scores = scores.masked_fill(~mask, float('-inf')) if mask is not None else scores
+
+    fully_masked = torch.all(masked_scores == float('-inf'), dim=-1, keepdim=True)
+    zeros = torch.zeros(masked_scores.shape)
+    softmax_result = torch.softmax(masked_scores, dim=-1)
+    softmax_result = torch.where(fully_masked, zeros, softmax_result)
+    return softmax_result @ value, softmax_result
