@@ -48,3 +48,7 @@ def softmax_attention_weights(masked_scores):
     softmax_result = torch.softmax(masked_scores, dim=-1)
     softmax_result = torch.where(fully_masked, zeros, softmax_result)
     return softmax_result
+
+def apply_attention_weights_to_values(attention_weights, value):
+    """Multiply attention weights by the value matrix to produce context vectors."""
+    return attention_weights @ value
