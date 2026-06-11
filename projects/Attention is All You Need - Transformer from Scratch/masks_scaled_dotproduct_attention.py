@@ -1,4 +1,5 @@
 import torch
+import math
 
 def build_padding_mask(token_ids, pad_id):
     """Return a (B, 1, 1, L) bool mask: True where token_ids != pad_id."""
@@ -28,3 +29,7 @@ def compute_raw_attention_scores(query, key):
     """Compute raw attention scores Q @ K^T over the last two dimensions."""
     Kt = torch.transpose(key, -1, -2)
     return torch.matmul(query, Kt)
+
+def scale_attention_scores(scores, d_k):
+    """divide raw attention scores by sqrt(d_k) to stabilize softmax inputs"""
+    return scores / math.sqrt(d_k)
