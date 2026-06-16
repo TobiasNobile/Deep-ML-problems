@@ -12,3 +12,11 @@ def transpose_heads_before_sequence(split_tensor):
     rearrange (B, L, num_heads, d_k) into (B, num_heads, L, d_k).
     """
     return torch.permute(split_tensor, (0, 2, 1, 3))
+
+def merge_heads_back_to_model_dim(multi_head_tensor):
+    """
+    merge the head axis back into the feature axis to reconstruct d_model
+    """
+    merged_heads = torch.transpose(multi_head_tensor, 1, 2)
+    B, L, H, d_k = merged_heads.shape
+    return torch.reshape(merged_heads, (B, L, H*d_k))
