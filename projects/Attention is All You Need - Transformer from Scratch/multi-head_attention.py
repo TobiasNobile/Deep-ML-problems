@@ -20,3 +20,11 @@ def merge_heads_back_to_model_dim(multi_head_tensor):
     merged_heads = torch.transpose(multi_head_tensor, 1, 2)
     B, L, H, d_k = merged_heads.shape
     return torch.reshape(merged_heads, (B, L, H*d_k))
+
+def apply_linear_projection(x, weight, bias):
+    """
+    return x @ weight^T + bias (bias may be None) with shape (..., out_features)
+    """
+    if bias is not None:
+        return x @ weight.T + bias
+    return x @ weight.T
