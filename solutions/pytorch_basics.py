@@ -27,3 +27,9 @@ def add_bias(x: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     2. Si elles sont égales ou si l'une d'elle vaut 1 ou est vide -> compatible
     """
     return x + b
+
+def linear_forward(x: torch.Tensor, W: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+    """
+    Implement y = x W^T + b using PyTorch ops
+    """
+    return x @ W.T + b
