@@ -33,3 +33,12 @@ def linear_forward(x: torch.Tensor, W: torch.Tensor, b: torch.Tensor) -> torch.T
     Implement y = x W^T + b using PyTorch ops
     """
     return x @ W.T + b
+
+def grad_of_quadratic(x_value: float) -> float:
+    """
+    Build a tracked leaf for x, compute f(x), run backprop, return df/dx as a float
+    """
+    x_tensor = torch.tensor(x_value, dtype=torch.float32, requires_grad=True)
+    forward = x_tensor**2 + 3*x_tensor + 2
+    forward.backward()
+    return x_tensor.grad.item()
