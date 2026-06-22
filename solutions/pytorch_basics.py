@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 def to_float_tensor(values):
     """
@@ -57,3 +58,17 @@ class LinearRegression(nn.Module):
         Return the output of the linear layer
         """
         return self.linear(x) 
+    
+def train_one_step(model: nn.Module, x: torch.Tensor, y: torch.Tensor, lr: float) -> float:
+    """
+    Build an SGD optimizer, run one full forward/loss/backward/step cycle,
+    and return the pre-update loss as a Python float.
+    """
+    x.requires_grad_(False)
+    optimizer = torch.optim.SGD(model.parameters(), lr = lr)
+
+    pred = model(x)
+    loss = F.mse_loss(pred, y)
+    loss.backward() # calcul des gradients
+    optimizer.step() # mise à jour des poids
+    return loss.item()
