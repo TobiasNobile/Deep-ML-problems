@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 
 def to_float_tensor(values):
     """
@@ -42,3 +43,17 @@ def grad_of_quadratic(x_value: float) -> float:
     forward = x_tensor**2 + 3*x_tensor + 2
     forward.backward()
     return x_tensor.grad.item()
+
+class LinearRegression(nn.Module):
+    def __init__(self, in_features: int, out_features: int):
+        """
+        Call the parent constructor and register an nn.Linear as self.linear
+        """
+        super().__init__()
+        self.linear = nn.Linear(in_features, out_features)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Return the output of the linear layer
+        """
+        return self.linear(x) 
