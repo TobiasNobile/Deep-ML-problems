@@ -42,3 +42,8 @@ def apply_adam_step_to_all_parameters(parameter_list, optimizer_state, learning_
         parameter_list[i].data = parameter_list[i].data - learning_rate * m_hat/(torch.sqrt(v_hat) + epsilon)
 
     return optimizer_state 
+
+def zero_all_parameter_gradients(parameter_list):
+    """Clear the .grad of every parameter tensor before the next backward pass."""
+    for i in range(len(parameter_list)):
+        parameter_list[i].grad = None
