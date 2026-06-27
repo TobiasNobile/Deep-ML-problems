@@ -17,15 +17,11 @@ def elbow_wcss(X: np.ndarray, k_values: list, max_iters: int = 100) -> list:
         WCSS = 0
         centroids = X[:k]
         for i in range(max_iters):
-            new_clusters = None
             clusters = {c:[] for c in range(len(centroids))}
             for j in range(len(X)):
                 distances = [sum(abs(X[j] - centroids[c]) **2) for c in clusters]
                 c_nearest = np.argmin((np.array(distances)))
                 clusters[c_nearest].append(X[j])
-            if clusters == new_clusters:
-                break
-            new_clusters = clusters.copy()
             centroids = [np.mean(clusters[c], axis=0) for c in clusters]
         
         for c in clusters:
