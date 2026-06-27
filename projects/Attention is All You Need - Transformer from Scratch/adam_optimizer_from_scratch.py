@@ -29,19 +29,23 @@ def apply_adam_step_to_all_parameters(parameter_list, optimizer_state, learning_
     Increment t, then for each param with a grad update m, v, bias-correct, and subtract delta in place.
     """
     optimizer_state["t"] += 1
-    for i in range(len(parameter_list)):
-        if parameter_list[i].grad is None:
-            continue
-        g = parameter_list[i].grad 
-        optimizer_state["m"][i] = beta1*optimizer_state["m"][i] + (1 - beta1)*g
-        optimizer_state["v"][i] = beta2*optimizer_state["v"][i] + (1 - beta2)*g**2
+    
+    with torch.no_grad():
+        for i in range(len(parameter_list)):
+            if parameter_list[i].grad is None:
+                continue
+            
+            g = parameter_list[i].grad 
+            
+            optimizer_state["m"][i] = beta1 * optimizer_state["m"][i] + (1 - beta1) * g
+            optimizer_state["v"][i] = beta2 * optimizer_state["v"][i] + (1 - beta2) * g**2
 
-        m_hat = optimizer_state["m"][i]/(1 - beta1**optimizer_state["t"])
-        v_hat = optimizer_state["v"][i]/(1 - beta2**optimizer_state["t"])
+            m_hat = optimizer_state["m"][i] / (1 - beta1**optimizer_state["t"])
+            v_hat = optimizer_state["v"][i] / (1 - beta2**optimizer_state["t"])
 
-        parameter_list[i].data = parameter_list[i].data - learning_rate * m_hat/(torch.sqrt(v_hat) + epsilon)
+            parameter_list[i] -= learning_rate * m_hat / (torch.sqrt(v_hat) + epsilon)
 
-    return optimizer_state 
+    return optimizer_state
 
 def zero_all_parameter_gradients(parameter_list):
     """Clear the .grad of every parameter tensor before the next backward pass."""

@@ -32,8 +32,8 @@ def build_sinusoidal_positional_encoding(max_len, d_model):
     div = compute_positional_div_term(d_model)
     pos = build_position_index_column(max_len)
     
-    pe = fill_even_indices_with_sin(pe, div, pos)
-    pe = fill_odd_indices_with_cos(pe, div, pos)
+    pe = fill_even_indices_with_sin(pe, pos, div)
+    pe = fill_odd_indices_with_cos(pe, pos, div)
 
     return pe
 
@@ -41,10 +41,6 @@ def add_positional_encoding_to_embeddings(embedded_batch, positional_encoding):
     """
     add the first L rows of positional_encoding to embedded_batch and return the sum.
     """
-    batch_size = embedded_batch.shape[0]
     L = embedded_batch.shape[1]
-    added = torch.clone(embedded_batch)
-
-    for b in range(batch_size):
-        added[b] = embedded_batch[b] + positional_encoding[:L]
-    return added
+    # L'opération d'addition broadcaste automatiquement sur la dimension Batch (dim 0)
+    return embedded_batch + positional_encoding[:L]

@@ -31,7 +31,7 @@ def assemble_encoder_layer(x, layer_params, num_heads, src_mask):
     ffn_gamma, ffn_beta = layer_params["ffn_gamma"], layer_params["ffn_beta"]
 
     self_attention = encoder_layer_self_attention_sublayer(x, w_q, w_k, w_v, w_o, attn_gamma, attn_beta, num_heads, src_mask)
-    return encoder_layer_feed_forward_sublayer(x, w1, b1, w2, b2, ffn_gamma, ffn_beta)
+    return encoder_layer_feed_forward_sublayer(self_attention, w1, b1, w2, b2, ffn_gamma, ffn_beta)
 
 def stack_encoder_layers(x, encoder_layer_params_list, num_heads, src_mask):
     """
@@ -55,7 +55,8 @@ def decoder_layer_cross_attention_sublayer(y, encoder_output, w_q, w_k, w_v, w_o
     Run multi-head cross-attention (Q from y, K/V from encoder_output) and wrap with add-and-norm
     """
     if src_mask is not None:
-        B, L = src_mask.shape
+        B = src_mask.shape[0]
+        L = src_mask.shape[-1]
         src_mask = torch.reshape(src_mask, (B, 1, 1, L))
     attention = assemble_multi_head_attention_forward(y, encoder_output, encoder_output, w_q, w_k, w_v, w_o, num_heads, src_mask)
     return apply_residual_add_and_norm(y, attention, gamma, beta)
@@ -99,12 +100,10 @@ def stack_decoder_layers(y, encoder_output, decoder_layer_params_list, num_heads
     """
     Sequentially apply each decoder layer to the running target hidden state.
     """
-    if not decoder_layer_params_list:
-        return y
-    decoder = assemble_decoder_layer(y, encoder_output, decoder_layer_params_list[0], num_heads, src_mask, tgt_mask)
-    for layer_params in decoder_layer_params_list[1:]:
-        decoder = assemble_decoder_layer(decoder, encoder_output, layer_params, num_heads, src_mask, tgt_mask)
-    return decoder
+    state = y
+    for layer_params in decoder_layer_params_list:
+        state = assemble_decoder_layer(state, encoder_output, layer_params, num_heads, src_mask, tgt_mask)
+    return state
 
 def apply_final_output_projection(decoder_output, output_projection_weight, output_projection_bias=None):
     """
@@ -151,7 +150,8 @@ def run_transformer_forward(src_ids, tgt_ids, model_params, num_heads, pad_id):
     encoder_output = stack_encoder_layers(src_enc,model_params['encoder_layers'], num_heads, src_mask)
     decoder_output = stack_decoder_layers(tgt_enc, encoder_output, model_params['decoder_layers'], num_heads, src_mask, combined_tgt)
 
-    logits = apply_final_output_projection(decoder_output,model_params['output_projection'])
+    output_bias = model_params.get('output_projection_bias', None)
+    logits = apply_final_output_projection(decoder_output, model_params['output_projection'], output_bias)
     probabilities = apply_log_softmax_over_vocab(logits)
     
     return probabilities
