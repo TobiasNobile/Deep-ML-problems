@@ -1,11 +1,11 @@
 import pandas as pd
 
-def solution(df):
+def filter_group_aggregate(df):
     df = df[df["status"] == "completed"]
     total = df.groupby("region", as_index=False)["amount"].sum()
     return total.sort_values(by="amount", ascending=False).head(10)
 
-def solution(df):
+def handle_missing_data(df):
     columns_to_drop = []
     for column in df.columns:
         missing_prop = df[column].isnull().sum()/len(df[column])
@@ -25,6 +25,13 @@ def solution(df):
 
     return df.fillna(value=nan_values)
 
-def solution(df1, df2, df3):
+def merge(df1, df2, df3):
     left = pd.merge(df1, df2, on='emp_id', how='inner')
     return pd.merge(left, df3, on='emp_id', how='left')
+
+def dedup_standardize_impute(df):
+    df['name'] = df['name'].str.strip().str.title()
+    df['date'] = pd.to_datetime(df['date'].str.strip()).dt.strftime('%Y-%m-%d')
+    df = df.drop_duplicates().reset_index(drop=True)
+    df['value'] = df['value'].fillna(df['value'].mean())
+    return df
